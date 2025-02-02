@@ -53,8 +53,8 @@ Standardizing sales dates and times for better analysis.
 Creating a "Product_Category" column to classify products as "Good" or "Bad" based on sales performance.
 Categorizing sales into time-based segments (Morning, Afternoon, Evening).
 
--------------------------- Data Cleaning Steps ------------------------------
-------------------------- Step 1: Identify Missing Values -------------------
+# Data Cleaning Steps 
+# Step 1: Identify Missing Values 
 
 # COUNT NULL values 
 
@@ -74,7 +74,7 @@ SELECT COUNT(*) AS missing_payment_mode
 FROM sales
 WHERE payment_mode IS  NULL;
 
---------------------------- Using SUM CASE WHEN Function -----------------------
+# Using SUM CASE WHEN Function 
 SELECT 
 SUM(CASE WHEN unit_price IS NULL THEN 1 ELSE 0 END) AS missing_unit_price,
 SUM(CASE WHEN product_category IS NULL THEN 1 ELSE 0 END) AS missing_product_category,
@@ -82,7 +82,7 @@ SUM(CASE WHEN product_category IS NULL THEN 1 ELSE 0 END) AS missing_total_sale,
 SUM(CASE WHEN payment_mode IS NULL  THEN 1 ELSE 0 END) AS payment_mode
 FROM sales;
 
-------------------------- Step 2.Fixed NULL Values----------------------------
+# Step 2.Fixed NULL Values
 # 1. Unit Price
 
 # ON UPDATE Safety Mode
@@ -142,7 +142,7 @@ SELECT COUNT(*)
 FROM sales
 WHERE payment_mode is null;
 
---------------- Step 3: Remove Duplicates--------------------
+# Step 3: Remove Duplicates
 # Identify Duplicates
 SELECT invoice_id, COUNT(*) as Duplicate_Count
 FROM sales
@@ -158,7 +158,7 @@ WHERE invoice_id NOT IN (
     ) AS derived_table
 );
 
- # -----------------------Step 4: Fix Incorrect Data Formats-------------------
+ # Step 4: Fix Incorrect Data Formats
  # --1. Convert Sale_Date to YYYY-MM-DD Format
 UPDATE sales
 SET sale_date = STR_To_DATE(sale_date,'%Y-%m-%d'); 
@@ -166,7 +166,7 @@ SET sale_date = STR_To_DATE(sale_date,'%Y-%m-%d');
 UPDATE sales 
 SET sale_time = TIME_FORMAT(sale_time, '%H-%i-%s');
 
-#-----------------------Step 5: Handle Outliers in Total_Sale-------------------
+#Step 5: Handle Outliers in Total_Sale
 
 # --1.Identify Outliers using IQR AND DELETE outliners;
 WITH quartiles AS (
@@ -185,7 +185,7 @@ DELETE FROM sales
 WHERE Total_Sale < (SELECT Q1 - 1.5 * (Q3 - Q1) FROM iqr_values)
    OR Total_Sale > (SELECT Q3 + 1.5 * (Q3 - Q1) FROM iqr_values);
 
-# -------------------------Step 6: Feature Engineering-------------------------------
+# Step 6: Feature Engineering
 # Categorize Products as ‘Good’ or ‘Bad’ Based on Sales Performance
 
 # Step 1: Declare a variable to store the average total_sale
@@ -247,7 +247,7 @@ ALTER TABLE sales ADD COLUMN month_name VARCHAR(20);
 Update sales
 SET month_name = MONTHNAME(sale_date);
 
-#------------------------Step 7: Save Cleaned Data------------------------
+# Step 7: Save Cleaned Data
 SELECT * FROM sales
 INTO OUTFILE 'C:/Cleaned_Walmart_Sales_Data.csv'
 FIELDS TERMINATED BY ','
